@@ -102,9 +102,13 @@ public class SuffixTree {
 		}
 		count += leaves.size();
 	}
-
-	public void removeFirstChar(char c) {
 	
+	public void removeFirstNChar(int n) {
+		for (int i = 0; i < n; i++)
+			removeFirstChar();
+	}
+	public void removeFirstChar() {
+		
 	}
 
 	public boolean contains(String substr) {

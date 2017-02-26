@@ -47,6 +47,38 @@ public class TextProcessorTest {
 		runRandomTest(200);
 	}
 	
+
+	@Test
+	public void test12() {
+		SuffixTree t = new SuffixTree();
+		t.addString("xyzaa");
+		t.removeFirstNChar(2);
+		
+		assertTrue(t.contains("a"));
+		assertTrue(t.contains("b"));
+		assertTrue(t.contains("ab"));
+		assertEquals(3, t.getCount());
+	}
+	
+
+	@Test
+	public void test22() {
+		SuffixTree t = new SuffixTree();
+		t.addString("aabbaaaabb");
+		t.removeFirstNChar(6);
+		
+		assertTrue(t.contains("a"));
+		assertTrue(t.contains("b"));
+		assertTrue(t.contains("ab"));
+		assertTrue(t.contains("aa"));
+		assertTrue(t.contains("bb"));
+		assertTrue(t.contains("aab"));
+		assertTrue(t.contains("abb"));
+		assertTrue(t.contains("aabb"));
+		assertEquals(8, t.getCount());
+	}
+
+	
 	private void runRandomTest(int length) {
 		String str = getRandomString(length);
 		Set<String> substrs = getSet(str, 0, str.length());
