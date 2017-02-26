@@ -13,19 +13,18 @@ public class TextProcessorTest {
 		SuffixTree t = new SuffixTree();
 		t.addChar('a');
 		t.addChar('b');
-		
+
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
 		assertTrue(t.contains("ab"));
 		assertEquals(3, t.getCount());
 	}
-	
 
 	@Test
 	public void test2() {
 		SuffixTree t = new SuffixTree();
 		t.addString("aabb");
-		
+
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
 		assertTrue(t.contains("ab"));
@@ -46,20 +45,18 @@ public class TextProcessorTest {
 		runRandomTest(100);
 		runRandomTest(200);
 	}
-	
 
 	@Test
 	public void test12() {
 		SuffixTree t = new SuffixTree();
 		t.addString("xyzab");
 		t.removeFirstNChar(3);
-		
+
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
 		assertTrue(t.contains("ab"));
 		assertEquals(3, t.getCount());
 	}
-	
 
 	@Test
 	public void test22() {
@@ -77,18 +74,31 @@ public class TextProcessorTest {
 		assertEquals(8, t.getCount());
 	}
 
+	@Test
+	public void test32() {
+		runRandomTest(5);
+		runRandomTest(20);
+		runRandomTest(100);
+		runRandomTest(700);
+		runRandomTest(500);
+		runRandomTest(600);
+	}
 	
 	private void runRandomTest(int length) {
 		String str = getRandomString(length);
-		Set<String> substrs = getSet(str, 0, str.length());
+		int i = (int) Math.random() * length;
+		
+		Set<String> substrs = getSet(str, i, str.length());
 		SuffixTree tree = new SuffixTree();
 		tree.addString(str);
+		tree.removeFirstNChar(i);
+		
 		assertEquals(substrs.size(), tree.getCount());
 		for (String s : substrs) {
 			tree.contains(s);
 		}
 	}
-	
+
 	private String getRandomString(int length) {
 		Random r = new Random();
 		StringBuilder sb = new StringBuilder();
@@ -96,24 +106,6 @@ public class TextProcessorTest {
 			sb.append(r.nextInt(length));
 		return sb.toString();
 	}
-
-	private void runTest(String str, int W, int[] ques) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(ques[0]);
-		for (int i = 1; i < ques.length; i++)
-			sb.append(", " + ques[i]);
-		System.out.printf("String: \"%s\"\nW: %d\nques: new int[]{%s}\n\n", str, W, sb);
-
-		for (int qi = 0; qi < ques.length; qi++) {
-			int start = ques[qi] - 1;
-			int end = start + W;
-			start = Math.max(start, 0);
-			end = Math.min(end, str.length());
-
-			getSet(str, start, end);
-		}
-	}
-
 
 	private Set<String> getSet(String str, int start, int end) {
 		Set<String> set = new HashSet<>();
