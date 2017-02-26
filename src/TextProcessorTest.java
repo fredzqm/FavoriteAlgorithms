@@ -51,8 +51,8 @@ public class TextProcessorTest {
 	@Test
 	public void test12() {
 		SuffixTree t = new SuffixTree();
-		t.addString("xyzaa");
-		t.removeFirstNChar(2);
+		t.addString("xyzab");
+		t.removeFirstNChar(3);
 		
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
@@ -64,9 +64,8 @@ public class TextProcessorTest {
 	@Test
 	public void test22() {
 		SuffixTree t = new SuffixTree();
-		t.addString("aabbaaaabb");
-		t.removeFirstNChar(6);
-		
+		t.addString("aaaabb");
+		t.removeFirstNChar(2);
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
 		assertTrue(t.contains("ab"));

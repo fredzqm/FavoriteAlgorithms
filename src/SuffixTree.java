@@ -19,7 +19,7 @@ public class SuffixTree {
 	private int offset, first;
 
 	// suffix tree representation
-	private final Node root, preRoot;
+	final Node root, preRoot;
 	private Node activeNode;
 	private long count;
 	private Queue<Node> leaves = new LinkedList<>();
@@ -52,16 +52,11 @@ public class SuffixTree {
 	public long getCount() {
 		return count;
 	}
-	
+
 	public char charAt(int index) {
 		return str.charAt(index - first + offset);
 	}
 
-	public void addString(String str) {
-		for (int i = 0 ; i < str.length(); i++)
-			addChar(str.charAt(i));
-	}
-	
 	public void addChar(char c) {
 		str.append(c);
 		Node match = activeNode.getNextNode(c);
@@ -102,13 +97,22 @@ public class SuffixTree {
 		}
 		count += leaves.size();
 	}
-	
-	public void removeFirstNChar(int n) {
-		for (int i = 0; i < n; i++)
-			removeFirstChar();
-	}
+
 	public void removeFirstChar() {
-		
+		Node removed = leaves.poll();
+		count -= removed.remove();
+	}
+
+	public void addString(String str) {
+		for (int i = 0; i < str.length(); i++) {
+			addChar(str.charAt(i));
+		}
+	}
+
+	public void removeFirstNChar(int n) {
+		for (int i = 0; i < n; i++) {
+			removeFirstChar();
+		}
 	}
 
 	public boolean contains(String substr) {
@@ -131,7 +135,7 @@ public class SuffixTree {
 	}
 
 	private class Node {
-		private Node parent, link;
+		private Node parent, link, longest;
 		private int start;
 		private Map<Character, Node> map;
 
@@ -149,10 +153,6 @@ public class SuffixTree {
 
 		public void setLink(Node link) {
 			this.link = link;
-		}
-
-		public Node getParent() {
-			return parent;
 		}
 
 		public int getStart() {
@@ -187,9 +187,30 @@ public class SuffixTree {
 				oldLeaf = new Node(this, start + 1);
 				this.map = new TreeMap<>(); // convert this to Interior node
 				this.map.put(oldLeaf.getStartChar(), oldLeaf);
+				this.longest = oldLeaf;
 			}
 			this.start = getLast();
 			return oldLeaf;
+		}
+
+		public long remove() {
+			if (isLeaf()) {
+				int len = getLast() - getStart();
+				Node p = this, c;
+				do {
+					len++;
+					c = p;
+					p = c.parent;
+					p.map.remove(c.getStartChar());
+				} while (p.map.size() == 0 && p.getStart() + 1 == c.getStart());
+				return len;
+			} else {
+				Node l = this;
+				while (!l.longest.isLeaf())
+					l = l.longest;
+				l.map.remove(l.longest.getStartChar());
+				return getLast() - l.longest.getStart() + 1;
+			}
 		}
 
 		@Override
@@ -203,12 +224,12 @@ public class SuffixTree {
 				for (int i = getStart(); i <= getLast(); i++)
 					sb.append(charAt(i));
 			} else {
-				if (parent != null) {
+				if (this != root) {
 					sb.append(getStartChar());
 					prefix += ' ';
 				}
 				for (Node n : map.values()) {
-					sb.append(n.toString(prefix));
+					sb.append(prefix + n.toString(prefix));
 				}
 			}
 			return sb.toString();
