@@ -1,5 +1,5 @@
+import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.TreeMap;
@@ -22,7 +22,7 @@ public class SuffixTree {
 	final Node root, preRoot;
 	private Node activeNode;
 	private long count;
-	private Queue<Node> leaves = new LinkedList<>();
+	private Queue<Node> leaves = new ArrayDeque<>();
 
 	public SuffixTree() {
 		this.str = new StringBuilder();

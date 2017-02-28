@@ -44,10 +44,11 @@ public class TextProcessorTest {
 		runRandomTest(70);
 		runRandomTest(100);
 		runRandomTest(200);
+		runRandomTest(500);
 	}
 
 	@Test
-	public void test12() {
+	public void test4() {
 		SuffixTree t = new SuffixTree();
 		t.addString("xyzab");
 		t.removeFirstNChar(3);
@@ -59,7 +60,7 @@ public class TextProcessorTest {
 	}
 
 	@Test
-	public void test22() {
+	public void test5() {
 		SuffixTree t = new SuffixTree();
 		t.addString("aaaabb");
 		t.removeFirstNChar(2);
@@ -75,23 +76,43 @@ public class TextProcessorTest {
 	}
 
 	@Test
-	public void test32() {
-		runRandomTest(5);
-		runRandomTest(20);
-		runRandomTest(100);
-		runRandomTest(700);
-		runRandomTest(500);
-		runRandomTest(600);
+	public void test6() {
+		runRandomWindowTest(2);
+		runRandomWindowTest(20);
+		runRandomWindowTest(60);
+		runRandomWindowTest(70);
+		runRandomWindowTest(100);
+		runRandomWindowTest(200);
+		runRandomWindowTest(500);
 	}
 	
 	private void runRandomTest(int length) {
 		String str = getRandomString(length);
-		int i = (int) Math.random() * length;
+		int start = (int) Math.random() * length;
 		
-		Set<String> substrs = getSet(str, i, str.length());
+		Set<String> substrs = getSet(str, start, str.length());
 		SuffixTree tree = new SuffixTree();
 		tree.addString(str);
-		tree.removeFirstNChar(i);
+		tree.removeFirstNChar(start);
+		
+		assertEquals(substrs.size(), tree.getCount());
+		for (String s : substrs) {
+			tree.contains(s);
+		}
+	}
+	
+	private void runRandomWindowTest(int length) {
+		String str = getRandomString(length);
+		int start = (int) Math.random() * length;
+		
+		Set<String> substrs = getSet(str, start, str.length());
+		int W = length - start;
+		SuffixTree tree = new SuffixTree();
+		for (int i = 0; i < length; i++) {
+			if (i >= W)
+				tree.removeFirstChar();
+			tree.addChar(str.charAt(i));
+		}
 		
 		assertEquals(substrs.size(), tree.getCount());
 		for (String s : substrs) {
