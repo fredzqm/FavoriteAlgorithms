@@ -1,5 +1,7 @@
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -9,133 +11,85 @@ import org.junit.Test;
 public class TextProcessorTest {
 
 	@Test
-	public void test1() {
-		SuffixTree t = new SuffixTree();
-		t.addChar('a');
-		t.addChar('b');
-
-		assertTrue(t.contains("a"));
-		assertTrue(t.contains("b"));
-		assertTrue(t.contains("ab"));
-		assertEquals(3, t.getCount());
-	}
-
-	@Test
-	public void test2() {
-		SuffixTree t = new SuffixTree();
-		t.addString("aabb");
-
-		assertTrue(t.contains("a"));
-		assertTrue(t.contains("b"));
-		assertTrue(t.contains("ab"));
-		assertTrue(t.contains("aa"));
-		assertTrue(t.contains("bb"));
-		assertTrue(t.contains("aab"));
-		assertTrue(t.contains("abb"));
-		assertTrue(t.contains("aabb"));
-		assertEquals(8, t.getCount());
+	public void test() {
+		runRandomTest(4, 3, 6);
+		runRandomTest(10, 7, 5);
+		runRandomTest(10, 7, 5);
+		runRandomTest(10, 7, 5);
+		runRandomTest(10, 7, 5);
+		runRandomTest(40, 9, 5);
+		runRandomTest(50, 10, 10);
+		runRandomTest(100, 20, 20);
+		runRandomTest(1000, 50, 2);
+		runRandomTest(10000, 50, 20);
 	}
 
 	@Test
 	public void test3() {
-		runRandomTest(2);
-		runRandomTest(20);
-		runRandomTest(60);
-		runRandomTest(70);
-		runRandomTest(100);
-		runRandomTest(200);
-		runRandomTest(500);
+		runTest("770", 3, new int[] { 1 });
+		runTest("abc", 3, new int[] { 1 });
+		runTest("123", 3, new int[] { 1 });
+		runTest("780", 3, new int[] { 1 });
 	}
 
 	@Test
 	public void test4() {
-		SuffixTree t = new SuffixTree();
-		t.addString("xyzab");
-		t.removeFirstNChar(3);
-
-		assertTrue(t.contains("a"));
-		assertTrue(t.contains("b"));
-		assertTrue(t.contains("ab"));
-		assertEquals(3, t.getCount());
+		runTest("0000", 3, new int[] { 1, 2 });
+		runTest("2201220", 7, new int[] { 1 });
+		runTest("2001001", 7, new int[] { 1 });
+		runTest("1110222", 7, new int[] { 1 });
 	}
 
 	@Test
 	public void test5() {
-		SuffixTree t = new SuffixTree();
-		t.addString("aaaabb");
-		t.removeFirstNChar(2);
-		assertTrue(t.contains("a"));
-		assertTrue(t.contains("b"));
-		assertTrue(t.contains("ab"));
-		assertTrue(t.contains("aa"));
-		assertTrue(t.contains("bb"));
-		assertTrue(t.contains("aab"));
-		assertTrue(t.contains("abb"));
-		assertTrue(t.contains("aabb"));
-		assertEquals(8, t.getCount());
+		runTest("0012012", 7, new int[] { 1 });
+		runTest("0000120120", 7, new int[] { 1, 3 });
 	}
 
-	@Test
-	public void test6() {
-		runRandomWindowTest(2);
-		runRandomWindowTest(20);
-		runRandomWindowTest(60);
-		runRandomWindowTest(70);
-		runRandomWindowTest(100);
-		runRandomWindowTest(200);
-		runRandomWindowTest(500);
-	}
-	
-	private void runRandomTest(int length) {
-		String str = getRandomString(length);
-		int start = (int) Math.random() * length;
-		
-		Set<String> substrs = getSet(str, start, str.length());
-		SuffixTree tree = new SuffixTree();
-		tree.addString(str);
-		tree.removeFirstNChar(start);
-		
-		assertEquals(substrs.size(), tree.getCount());
-		for (String s : substrs) {
-			tree.contains(s);
-		}
-	}
-	
-	private void runRandomWindowTest(int length) {
-		String str = getRandomString(length);
-		int start = (int) Math.random() * length;
-		
-		Set<String> substrs = getSet(str, start, str.length());
-		int W = length - start;
-		SuffixTree tree = new SuffixTree();
-		for (int i = 0; i < length; i++) {
-			if (i >= W)
-				tree.removeFirstChar();
-			tree.addChar(str.charAt(i));
-		}
-		
-		assertEquals(substrs.size(), tree.getCount());
-		for (String s : substrs) {
-			tree.contains(s);
-		}
-	}
-
-	private String getRandomString(int length) {
+	private void runRandomTest(int length, int W, int Q) {
 		Random r = new Random();
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++)
-			sb.append(r.nextInt(length));
-		return sb.toString();
+			sb.append(r.nextInt(length - W));
+
+		int[] ques = new int[Q];
+		for (int i = 0; i < Q; i++) {
+			ques[i] = r.nextInt(length - W) + 1;
+		}
+		runTest(sb.toString(), W, ques);
 	}
 
-	private Set<String> getSet(String str, int start, int end) {
-		Set<String> set = new HashSet<>();
-		for (int i = start; i < end; i++) {
-			for (int j = i + 1; j <= end; j++) {
-				set.add(str.substring(i, j));
+	private void runTest(String str, int W, int[] ques) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(ques[0]);
+		for (int i = 1; i < ques.length; i++)
+			sb.append(", " + ques[i]);
+		System.out.printf("String: \"%s\"\nW: %d\nques: new int[]{%s}\n\n", str, W, sb);
+
+		TextProcessor textProcessor = new TextProcessor(str, W);
+		long[] found = textProcessor.solve(ques);
+		for (int qi = 0; qi < ques.length; qi++) {
+			int start = ques[qi] - 1;
+			int end = start + W;
+			start = Math.max(start, 0);
+			end = Math.min(end, str.length());
+
+			Set<String> set = new HashSet<>();
+			for (int i = start; i < end; i++) {
+				for (int j = i + 1; j <= end; j++) {
+					set.add(str.substring(i, j));
+				}
 			}
+			printSet(set);
+			assertEquals("from: " + start + " to: " + end + " string: " + str.substring(start, end), set.size(),
+					found[qi]);
 		}
-		return set;
+	}
+
+	private void printSet(Set<String> set) {
+		ArrayList<String> ls = new ArrayList<>(set);
+		Collections.sort(ls);
+		System.out.println(ls);
 	}
 
 }
