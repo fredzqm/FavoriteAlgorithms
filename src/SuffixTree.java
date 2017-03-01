@@ -117,11 +117,11 @@ public class SuffixTree {
 		}
 	}
 
-	private Node pollLeaf() {
+	protected Node pollLeaf() {
 		return leaves.poll().get();
 	}
 
-	private void pushLeaf(Node leafNode) {
+	protected void pushLeaf(Node leafNode) {
 		Leaf l = new Leaf(leafNode);
 		leafNode.leaf = l;
 		leaves.add(l);
@@ -190,7 +190,7 @@ public class SuffixTree {
 		}
 
 		public boolean isLeaf() {
-			assert (map == null) == (leaf != null);
+//			assert (map == null) == (leaf != null);
 			return map == null;
 		}
 
