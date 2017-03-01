@@ -104,22 +104,23 @@ public class SuffixTreeTest {
 	public void test8() {
 		SuffixTree t = new SuffixTree();
 		t.addString("3717950");
-//		System.out.println(t);
 		t.removeFirstChar();
-//		System.out.println(t);
 		t.addChar('1');
-//		System.out.println(t);
 		t.removeFirstChar();
-//		System.out.println(t);
 		t.addChar('3');
-//		System.out.println(t);
 		t.removeFirstChar();
-//		System.out.println(t);
 		t.addChar('1');
-//		System.out.println(t);
 		assertEquals(27, t.getCount());
 	}
 
+	@Test
+	public void test9() {
+		SuffixTree t = new SuffixTree();
+		t.addString("cdddcd");
+		t.removeFirstChar();
+		assertEquals(11, t.getCount());
+	}
+	
 	private void runRandomTest(int length) {
 		String str = getRandomString(length);
 		int start = (int) Math.random() * length;
