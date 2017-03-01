@@ -95,7 +95,6 @@ public class TextProcessorTest {
 	private void printSet(Set<String> set) {
 		ArrayList<String> ls = new ArrayList<>(set);
 		Collections.sort(ls);
-		System.out.println(ls);
 	}
 
 }

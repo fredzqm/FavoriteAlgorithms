@@ -2,12 +2,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Queue;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 /**
  * https://open.kattis.com/problems/textprocessor

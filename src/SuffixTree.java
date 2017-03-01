@@ -57,8 +57,6 @@ public class SuffixTree {
 
 	public void addChar(char c) {
 		str.append(c);
-		while (activeNode.isLeaf())
-			activeNode = activeNode.getLink();
 		Node match = activeNode.getNextNode(c);
 		if (match == null) {
 			Node lastcreatedLeaf = activeNode.createLeaf(c);
@@ -111,6 +109,10 @@ public class SuffixTree {
 			removed = parent;
 		} while (startFrom == removed.getStartFrom());
 		count -= removeCount;
+		while (activeNode.isLeaf()) {
+			leaves.add(activeNode);
+			activeNode = activeNode.getLink();
+		}
 	}
 
 	public void addString(String str) {
