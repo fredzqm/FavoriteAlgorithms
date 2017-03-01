@@ -1,7 +1,5 @@
-import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Queue;
 import java.util.TreeMap;
 
 /**
@@ -22,15 +20,15 @@ public class SuffixTree {
 	final Node root, preRoot;
 	private Node activeNode;
 	private long count;
-	private Queue<Node> leaves = new ArrayDeque<>();
+	private CircularDeque<Node> leaves = new CircularDeque<>();
 
 	public SuffixTree() {
 		this.str = new StringBuilder();
 		this.offset = 0;
 		this.first = 0;
-		this.preRoot = new Node(null, Integer.MAX_VALUE);
+		this.preRoot = new Node(null, -2, Integer.MIN_VALUE);
 		this.preRoot.map = Collections.emptyMap();
-		this.root = new Node(preRoot, Integer.MAX_VALUE);
+		this.root = new Node(preRoot, -1, Integer.MIN_VALUE);
 		this.root.map = new TreeMap<>();
 		this.root.setLink(preRoot);
 		this.activeNode = root;
@@ -42,27 +40,28 @@ public class SuffixTree {
 	}
 
 	public int getLast() {
-		return first + str.length() - offset - 1;
+		return str.length() - offset - 1;
 	}
 
 	public int length() {
-		return str.length() - offset;
+		return str.length() - offset - first;
+	}
+
+	public char charAt(int index) {
+		return str.charAt(index + offset);
 	}
 
 	public long getCount() {
 		return count;
 	}
 
-	public char charAt(int index) {
-		return str.charAt(index - first + offset);
-	}
-
 	public void addChar(char c) {
 		str.append(c);
+		while (activeNode.isLeaf())
+			activeNode = activeNode.getLink();
 		Node match = activeNode.getNextNode(c);
 		if (match == null) {
 			Node lastcreatedLeaf = activeNode.createLeaf(c);
-			leaves.add(lastcreatedLeaf);
 			while (true) {
 				activeNode = activeNode.getLink();
 				match = activeNode.getNextNode(c);
@@ -71,7 +70,6 @@ public class SuffixTree {
 					break;
 				}
 				Node createdLeaf = activeNode.createLeaf(c);
-				leaves.add(createdLeaf);
 				lastcreatedLeaf.setLink(createdLeaf);
 				lastcreatedLeaf = createdLeaf;
 			}
@@ -100,7 +98,19 @@ public class SuffixTree {
 
 	public void removeFirstChar() {
 		Node removed = leaves.poll();
-		count -= removed.remove();
+		first++;
+		assert removed.isLeaf();
+		int removeCount = getLast() - removed.getStart();
+		int startFrom = removed.getStartFrom();
+		do {
+			removeCount++;
+			Node parent = removed.parent;
+			parent.map.remove(removed.getStartChar());
+			if (parent.map.isEmpty())
+				parent.map = null;
+			removed = parent;
+		} while (startFrom == removed.getStartFrom());
+		count -= removeCount;
 	}
 
 	public void addString(String str) {
@@ -131,19 +141,20 @@ public class SuffixTree {
 
 	@Override
 	public String toString() {
-		return str.substring(offset + getFirst());
+		return String.format("str: %s%s", str.substring(offset + getFirst(), offset + getLast() + 1), root);
 	}
 
 	private class Node {
-		private Node parent, link, longest;
-		private int start;
+		private Node parent, link;
+		private int start, level;
 		private Map<Character, Node> map;
 
 		/**
 		 * create a root
 		 */
-		public Node(Node parent, int start) {
+		public Node(Node parent, int level, int start) {
 			this.parent = parent;
+			this.level = level;
 			this.start = start;
 		}
 
@@ -153,6 +164,10 @@ public class SuffixTree {
 
 		public void setLink(Node link) {
 			this.link = link;
+		}
+
+		public int getStartFrom() {
+			return start - level;
 		}
 
 		public int getStart() {
@@ -175,42 +190,23 @@ public class SuffixTree {
 
 		public Node createLeaf(char toBeAdd) {
 			this.start = getLast() - 1;
-			Node leaf = new Node(this, getLast());
+			Node leaf = new Node(this, level + 1, getLast());
 			assert leaf.getStartChar() == toBeAdd;
 			map.put(leaf.getStartChar(), leaf);
+			leaves.add(leaf);
 			return leaf;
 		}
 
 		public Node breakFirst() {
 			Node oldLeaf = null;
 			if (isLeaf()) {
-				oldLeaf = new Node(this, start + 1);
-				this.map = new TreeMap<>(); // convert this to Interior node
+				oldLeaf = new Node(this, level + 1, start + 1);
+				this.map = new TreeMap<>();
 				this.map.put(oldLeaf.getStartChar(), oldLeaf);
-				this.longest = oldLeaf;
+				leaves.set(getStartFrom() - getFirst(), oldLeaf);
 			}
 			this.start = getLast();
 			return oldLeaf;
-		}
-
-		public long remove() {
-			if (isLeaf()) {
-				int len = getLast() - getStart();
-				Node p = this, c;
-				do {
-					len++;
-					c = p;
-					p = c.parent;
-					p.map.remove(c.getStartChar());
-				} while (p.map.size() == 0 && p.getStart() + 1 == c.getStart());
-				return len;
-			} else {
-				Node l = this;
-				while (!l.longest.isLeaf())
-					l = l.longest;
-				l.map.remove(l.longest.getStartChar());
-				return getLast() - l.longest.getStart() + 1;
-			}
 		}
 
 		@Override
@@ -246,7 +242,7 @@ public class SuffixTree {
 
 		public boolean accept(char c) {
 			if (curNode.isLeaf()) {
-				if (index < length() && c == charAt(index + 1)) {
+				if (index <= getLast() && c == charAt(index + 1)) {
 					index++;
 					return true;
 				} else {

@@ -46,11 +46,17 @@ public class TextProcessorTest {
 		runTest("0000120120", 7, new int[] { 1, 3 });
 	}
 
+	@Test
+	public void test6() {
+		runTest("7500", 3, new int[] { 1 });
+		runTest("3717950131", 7, new int[] { 1, 3 });
+	}
+	
 	private void runRandomTest(int length, int W, int Q) {
 		Random r = new Random();
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++)
-			sb.append(r.nextInt(length - W));
+			sb.append(r.nextInt(10));
 
 		int[] ques = new int[Q];
 		for (int i = 0; i < Q; i++) {

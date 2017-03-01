@@ -45,13 +45,17 @@ public class SuffixTreeTest {
 		runRandomTest(100);
 		runRandomTest(200);
 		runRandomTest(500);
+		runRandomTest(1000);
+		runRandomTest(2000);
 	}
 
 	@Test
 	public void test4() {
 		SuffixTree t = new SuffixTree();
 		t.addString("xyzab");
-		t.removeFirstNChar(3);
+		t.removeFirstChar();
+		t.removeFirstChar();
+		t.removeFirstChar();
 
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
@@ -63,7 +67,8 @@ public class SuffixTreeTest {
 	public void test5() {
 		SuffixTree t = new SuffixTree();
 		t.addString("aaaabb");
-		t.removeFirstNChar(2);
+		t.removeFirstChar();
+		t.removeFirstChar();
 		assertTrue(t.contains("a"));
 		assertTrue(t.contains("b"));
 		assertTrue(t.contains("ab"));
@@ -84,6 +89,35 @@ public class SuffixTreeTest {
 		runRandomWindowTest(100);
 		runRandomWindowTest(200);
 		runRandomWindowTest(500);
+	}
+
+	@Test
+	public void test7() {
+		SuffixTree t = new SuffixTree();
+		t.addString("750");
+		t.removeFirstChar();
+		t.addChar('0');
+		assertEquals(5, t.getCount());
+	}
+
+	@Test
+	public void test8() {
+		SuffixTree t = new SuffixTree();
+		t.addString("3717950");
+//		System.out.println(t);
+		t.removeFirstChar();
+//		System.out.println(t);
+		t.addChar('1');
+//		System.out.println(t);
+		t.removeFirstChar();
+//		System.out.println(t);
+		t.addChar('3');
+//		System.out.println(t);
+		t.removeFirstChar();
+//		System.out.println(t);
+		t.addChar('1');
+//		System.out.println(t);
+		assertEquals(27, t.getCount());
 	}
 
 	private void runRandomTest(int length) {
