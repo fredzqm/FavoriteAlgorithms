@@ -1,5 +1,7 @@
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.TreeMap;
 
 /**
@@ -20,7 +22,7 @@ public class SuffixTree {
 	final Node root, preRoot;
 	private Node activeNode;
 	private long count;
-	private CircularDeque<Node> leaves = new CircularDeque<>();
+	private Queue<Leaf> leaves = new LinkedList<>();
 
 	public SuffixTree() {
 		this.str = new StringBuilder();
@@ -95,7 +97,7 @@ public class SuffixTree {
 	}
 
 	public void removeFirstChar() {
-		Node removed = leaves.poll();
+		Node removed = pollLeaf();
 		first++;
 		assert removed.isLeaf();
 		int removeCount = getLast() - removed.getStart();
@@ -110,9 +112,19 @@ public class SuffixTree {
 		} while (startFrom == removed.getStartFrom());
 		count -= removeCount;
 		while (activeNode.isLeaf()) {
-			leaves.add(activeNode);
+			pushLeaf(activeNode);
 			activeNode = activeNode.getLink();
 		}
+	}
+
+	private Node pollLeaf() {
+		return leaves.poll().get();
+	}
+
+	private void pushLeaf(Node leafNode) {
+		Leaf l = new Leaf(leafNode);
+		leafNode.leaf = l;
+		leaves.add(l);
 	}
 
 	public void addString(String str) {
@@ -150,6 +162,7 @@ public class SuffixTree {
 		private Node parent, link;
 		private int start, level;
 		private Map<Character, Node> map;
+		private Leaf leaf;
 
 		/**
 		 * create a root
@@ -177,6 +190,7 @@ public class SuffixTree {
 		}
 
 		public boolean isLeaf() {
+			assert (map == null) == (leaf != null);
 			return map == null;
 		}
 
@@ -195,7 +209,7 @@ public class SuffixTree {
 			Node leaf = new Node(this, level + 1, getLast());
 			assert leaf.getStartChar() == toBeAdd;
 			map.put(leaf.getStartChar(), leaf);
-			leaves.add(leaf);
+			pushLeaf(leaf);
 			return leaf;
 		}
 
@@ -205,7 +219,7 @@ public class SuffixTree {
 				oldLeaf = new Node(this, level + 1, start + 1);
 				this.map = new TreeMap<>();
 				this.map.put(oldLeaf.getStartChar(), oldLeaf);
-				leaves.set(getStartFrom() - getFirst(), oldLeaf);
+				leaf.set(oldLeaf);
 			}
 			this.start = getLast();
 			return oldLeaf;
@@ -231,6 +245,24 @@ public class SuffixTree {
 				}
 			}
 			return sb.toString();
+		}
+	}
+
+	public class Leaf {
+		private Node leafNode;
+
+		public Leaf(Node leafNode) {
+			this.leafNode = leafNode;
+		}
+
+		public Node get() {
+			return leafNode;
+		}
+
+		public void set(Node newLeafNode) {
+			this.leafNode.leaf = null;
+			newLeafNode.leaf = this;
+			this.leafNode = newLeafNode;
 		}
 	}
 
