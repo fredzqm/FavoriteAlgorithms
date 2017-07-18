@@ -31,10 +31,6 @@ public class SuffixTree {
 		this.activeNode = root;
 	}
 
-	public int getLast() {
-		return str.length() - 1;
-	}
-
 	public int length() {
 		return str.length();
 	}
@@ -162,8 +158,8 @@ public class SuffixTree {
 		}
 
 		public Node createLeaf(char toBeAdd) {
-			this.start = getLast() - 1;
-			Node leaf = new Node(this, getLast());
+			this.start = length() - 2;
+			Node leaf = new Node(this, length() - 1);
 			assert leaf.getStartChar() == toBeAdd;
 			map.put(leaf.getStartChar(), leaf);
 			return leaf;
@@ -176,7 +172,7 @@ public class SuffixTree {
 				this.map = new TreeMap<>();
 				this.map.put(oldLeaf.getStartChar(), oldLeaf);
 			}
-			this.start = getLast();
+			this.start = length() - 1;
 			return oldLeaf;
 		}
 
@@ -188,7 +184,7 @@ public class SuffixTree {
 		public String toString(String prefix) {
 			StringBuilder sb = new StringBuilder("\n" + prefix);
 			if (isLeaf()) {
-				for (int i = getStart(); i <= getLast(); i++)
+				for (int i = getStart(); i < length(); i++)
 					sb.append(charAt(i));
 			} else {
 				if (this != root) {
@@ -213,7 +209,7 @@ public class SuffixTree {
 
 		public boolean accept(char c) {
 			if (curNode.isLeaf()) {
-				if (index <= getLast() && c == charAt(index + 1)) {
+				if (index < length() && c == charAt(index + 1)) {
 					index++;
 					return true;
 				} else {
