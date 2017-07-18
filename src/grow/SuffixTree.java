@@ -1,8 +1,7 @@
 package grow;
+
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.TreeMap;
 
 /**
@@ -17,45 +16,35 @@ import java.util.TreeMap;
 public class SuffixTree {
 	// basic string representation
 	private final StringBuilder str;
-	private int offset, first;
 
 	// suffix tree representation
-	final Node root, preRoot;
+	private final Node root, preRoot;
 	private Node activeNode;
-	private long count;
-	private Queue<Leaf> leaves = new LinkedList<>();
 
 	public SuffixTree() {
 		this.str = new StringBuilder();
-		this.offset = 0;
-		this.first = 0;
-		this.preRoot = new Node(null, -2, Integer.MIN_VALUE);
+		this.preRoot = new Node(null, Integer.MIN_VALUE);
 		this.preRoot.map = Collections.emptyMap();
-		this.root = new Node(preRoot, -1, Integer.MIN_VALUE);
+		this.root = new Node(preRoot, Integer.MIN_VALUE);
 		this.root.map = new TreeMap<>();
 		this.root.setLink(preRoot);
 		this.activeNode = root;
-		this.count = 0;
-	}
-
-	public int getFirst() {
-		return first;
 	}
 
 	public int getLast() {
-		return str.length() - offset - 1;
+		return str.length() - 1;
 	}
 
 	public int length() {
-		return str.length() - offset - first;
+		return str.length();
 	}
 
 	public char charAt(int index) {
-		return str.charAt(index + offset);
+		return str.charAt(index);
 	}
 
 	public long getCount() {
-		return count;
+		return this.root.count() - 1;
 	}
 
 	public void addChar(char c) {
@@ -94,17 +83,6 @@ public class SuffixTree {
 				lastcreatedLeaf = link;
 			}
 		}
-		count += leaves.size();
-	}
-
-	protected Node pollLeaf() {
-		return leaves.poll().get();
-	}
-
-	protected void pushLeaf(Node leafNode) {
-		Leaf l = new Leaf(leafNode);
-		leafNode.leaf = l;
-		leaves.add(l);
 	}
 
 	public void addString(String str) {
@@ -129,22 +107,32 @@ public class SuffixTree {
 
 	@Override
 	public String toString() {
-		return String.format("str: %s%s", str.substring(offset + getFirst(), offset + getLast() + 1), root);
+		return String.format("str: %s%s", str, root);
 	}
 
 	private class Node {
 		private Node parent, link;
-		private int start, level;
+		private int start;
 		private Map<Character, Node> map;
-		private Leaf leaf;
 
 		/**
 		 * create a root
 		 */
-		public Node(Node parent, int level, int start) {
+		public Node(Node parent, int start) {
 			this.parent = parent;
-			this.level = level;
 			this.start = start;
+		}
+
+		public long count() {
+			if (isLeaf()) {
+				return length() - start;
+			} else {
+				long count = 1;
+				for (Node child : map.values()) {
+					count += child.count();
+				}
+				return count;
+			}
 		}
 
 		public Node getLink() {
@@ -155,16 +143,11 @@ public class SuffixTree {
 			this.link = link;
 		}
 
-		public int getStartFrom() {
-			return start - level;
-		}
-
 		public int getStart() {
 			return start;
 		}
 
 		public boolean isLeaf() {
-//			assert (map == null) == (leaf != null);
 			return map == null;
 		}
 
@@ -180,20 +163,18 @@ public class SuffixTree {
 
 		public Node createLeaf(char toBeAdd) {
 			this.start = getLast() - 1;
-			Node leaf = new Node(this, level + 1, getLast());
+			Node leaf = new Node(this, getLast());
 			assert leaf.getStartChar() == toBeAdd;
 			map.put(leaf.getStartChar(), leaf);
-			pushLeaf(leaf);
 			return leaf;
 		}
 
 		public Node breakFirst() {
 			Node oldLeaf = null;
 			if (isLeaf()) {
-				oldLeaf = new Node(this, level + 1, start + 1);
+				oldLeaf = new Node(this, start + 1);
 				this.map = new TreeMap<>();
 				this.map.put(oldLeaf.getStartChar(), oldLeaf);
-				leaf.set(oldLeaf);
 			}
 			this.start = getLast();
 			return oldLeaf;
@@ -219,24 +200,6 @@ public class SuffixTree {
 				}
 			}
 			return sb.toString();
-		}
-	}
-
-	public class Leaf {
-		private Node leafNode;
-
-		public Leaf(Node leafNode) {
-			this.leafNode = leafNode;
-		}
-
-		public Node get() {
-			return leafNode;
-		}
-
-		public void set(Node newLeafNode) {
-			this.leafNode.leaf = null;
-			newLeafNode.leaf = this;
-			this.leafNode = newLeafNode;
 		}
 	}
 
