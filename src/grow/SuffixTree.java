@@ -52,36 +52,19 @@ public class SuffixTree {
 				activeNode = activeNode.getLink();
 				match = activeNode.getNextNode(c);
 				if (match != null) {
-					lastcreatedLeaf.setLink(match);
 					break;
 				}
 				Node createdLeaf = activeNode.createLeaf(c);
 				lastcreatedLeaf.setLink(createdLeaf);
 				lastcreatedLeaf = createdLeaf;
 			}
+			lastcreatedLeaf.setLink(match);
 		}
 		activeNode = match;
-		Node lastcreatedLeaf = match.breakFirst();
-		if (lastcreatedLeaf != null) {
-			// a new leaf is created when creating interior node
-			c = lastcreatedLeaf.getStartChar();
-			while (true) {
-				match = match.getLink();
-				if (!match.isLeaf()) {
-					Node link = match.getNextNode(c);
-					assert link != null;
-					lastcreatedLeaf.setLink(link);
-					break;
-				}
-				Node link = match.breakFirst();
-				assert link.getStartChar() == c;
-				lastcreatedLeaf.setLink(link);
-				lastcreatedLeaf = link;
-			}
-		}
+		activeNode.breakFirst();
 	}
 
-	public void addString(String str) {
+	public void addString(CharSequence str) {
 		for (int i = 0; i < str.length(); i++) {
 			addChar(str.charAt(i));
 		}
@@ -161,19 +144,17 @@ public class SuffixTree {
 			this.start = length() - 2;
 			Node leaf = new Node(this, length() - 1);
 			assert leaf.getStartChar() == toBeAdd;
-			map.put(leaf.getStartChar(), leaf);
+			map.put(toBeAdd, leaf);
 			return leaf;
 		}
 
-		public Node breakFirst() {
-			Node oldLeaf = null;
+		public void breakFirst() {
 			if (isLeaf()) {
-				oldLeaf = new Node(this, start + 1);
+				Node oldLeaf = new Node(this, start + 1);
 				this.map = new TreeMap<>();
 				this.map.put(oldLeaf.getStartChar(), oldLeaf);
 			}
 			this.start = length() - 1;
-			return oldLeaf;
 		}
 
 		@Override
