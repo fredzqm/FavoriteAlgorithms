@@ -108,10 +108,10 @@ public class SuffixTreeTest {
 		Set<String> substrs = getSet(str, start, str.length());
 		SuffixTree tree = new SuffixTree();
 		tree.addString(str);
-
+		
 		assertEquals(substrs.size(), tree.getCount());
 		for (String s : substrs) {
-			tree.contains(s);
+			assertTrue(tree.contains(s));
 		}
 	}
 

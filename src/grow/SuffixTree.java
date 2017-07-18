@@ -45,23 +45,12 @@ public class SuffixTree {
 
 	public void addChar(char c) {
 		str.append(c);
-		Node match = activeNode.getNextNode(c);
-		if (match == null) {
-			Node lastcreatedLeaf = activeNode.createLeaf(c);
-			while (true) {
-				activeNode = activeNode.getLink();
-				match = activeNode.getNextNode(c);
-				if (match != null) {
-					break;
-				}
-				Node createdLeaf = activeNode.createLeaf(c);
-				lastcreatedLeaf.setLink(createdLeaf);
-				lastcreatedLeaf = createdLeaf;
-			}
-			lastcreatedLeaf.setLink(match);
+		Node match;
+		while ((match = activeNode.getNextNode(c)) == null) {
+			activeNode.createLeaf(c);
+			activeNode = activeNode.getLink();
 		}
 		activeNode = match;
-		activeNode.breakFirst();
 	}
 
 	public void addString(CharSequence str) {
@@ -90,14 +79,15 @@ public class SuffixTree {
 	}
 
 	private class Node {
-		private Node parent, link;
-		private int start;
+		private final Node parent;
+		private Node link;
+		private final int start;
 		private Map<Character, Node> map;
 
 		/**
 		 * create a root
 		 */
-		public Node(Node parent, int start) {
+		public Node(final Node parent, final int start) {
 			this.parent = parent;
 			this.start = start;
 		}
@@ -115,6 +105,9 @@ public class SuffixTree {
 		}
 
 		public Node getLink() {
+			if (link == null) {
+				link = this.parent.getLink().getNextNode(this.getStartChar());
+			}
 			return link;
 		}
 
@@ -133,6 +126,11 @@ public class SuffixTree {
 		public Node getNextNode(char c) {
 			if (this == preRoot)
 				return root;
+			if (this.isLeaf()) {
+				final Node oldLeaf = new Node(this, start + 1);
+				this.map = new TreeMap<>();
+				this.map.put(oldLeaf.getStartChar(), oldLeaf);
+			}
 			return map.get(c);
 		}
 
@@ -141,20 +139,9 @@ public class SuffixTree {
 		}
 
 		public Node createLeaf(char toBeAdd) {
-			this.start = length() - 2;
 			Node leaf = new Node(this, length() - 1);
-			assert leaf.getStartChar() == toBeAdd;
 			map.put(toBeAdd, leaf);
 			return leaf;
-		}
-
-		public void breakFirst() {
-			if (isLeaf()) {
-				Node oldLeaf = new Node(this, start + 1);
-				this.map = new TreeMap<>();
-				this.map.put(oldLeaf.getStartChar(), oldLeaf);
-			}
-			this.start = length() - 1;
 		}
 
 		@Override
