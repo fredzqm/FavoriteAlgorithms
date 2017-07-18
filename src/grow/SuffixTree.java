@@ -47,7 +47,7 @@ public class SuffixTree {
 		str.append(c);
 		Node match;
 		while ((match = activeNode.getNextNode(c)) == null) {
-			activeNode.createLeaf(c);
+			activeNode.createLeafAt(length() - 1);
 			activeNode = activeNode.getLink();
 		}
 		activeNode = match;
@@ -69,7 +69,7 @@ public class SuffixTree {
 		return true;
 	}
 
-	public TreeTraverser traverser() {
+	private TreeTraverser traverser() {
 		return new TreeTraverser(root);
 	}
 
@@ -92,18 +92,6 @@ public class SuffixTree {
 			this.start = start;
 		}
 
-		public long count() {
-			if (isLeaf()) {
-				return length() - start;
-			} else {
-				long count = 1;
-				for (Node child : map.values()) {
-					count += child.count();
-				}
-				return count;
-			}
-		}
-
 		public Node getLink() {
 			if (link == null) {
 				link = this.parent.getLink().getNextNode(this.getStartChar());
@@ -119,6 +107,14 @@ public class SuffixTree {
 			return start;
 		}
 
+		public char getStartChar() {
+			return str.charAt(start);
+		}
+
+		public Node getParent() {
+			return parent;
+		}
+		
 		public boolean isLeaf() {
 			return map == null;
 		}
@@ -127,30 +123,35 @@ public class SuffixTree {
 			if (this == preRoot)
 				return root;
 			if (this.isLeaf()) {
-				final Node oldLeaf = new Node(this, start + 1);
 				this.map = new TreeMap<>();
-				this.map.put(oldLeaf.getStartChar(), oldLeaf);
+				createLeafAt(start + 1);
 			}
 			return map.get(c);
 		}
 
-		public char getStartChar() {
-			return str.charAt(start);
+		private void createLeafAt(int start) {
+			this.map.put(charAt(start), new Node(this, start));
 		}
 
-		public Node createLeaf(char toBeAdd) {
-			Node leaf = new Node(this, length() - 1);
-			map.put(toBeAdd, leaf);
-			return leaf;
+		public long count() {
+			if (isLeaf()) {
+				return length() - start;
+			} else {
+				long count = 1;
+				for (Node child : map.values()) {
+					count += child.count();
+				}
+				return count;
+			}
 		}
-
+		
 		@Override
 		public String toString() {
 			return toString("");
 		}
 
 		public String toString(String prefix) {
-			StringBuilder sb = new StringBuilder("\n" + prefix);
+			final StringBuilder sb = new StringBuilder("\n" + prefix);
 			if (isLeaf()) {
 				for (int i = getStart(); i < length(); i++)
 					sb.append(charAt(i));
@@ -165,17 +166,18 @@ public class SuffixTree {
 			}
 			return sb.toString();
 		}
+
 	}
 
-	public class TreeTraverser {
+	private class TreeTraverser {
 		private Node curNode;
 		private int index;
 
-		public TreeTraverser(Node node) {
+		public TreeTraverser(final Node node) {
 			this.curNode = node;
 		}
 
-		public boolean accept(char c) {
+		public boolean accept(final char c) {
 			if (curNode.isLeaf()) {
 				if (index < length() && c == charAt(index + 1)) {
 					index++;
@@ -190,7 +192,6 @@ public class SuffixTree {
 				} else {
 					curNode = next;
 					index = curNode.getStart();
-					assert charAt(index) == c;
 					return true;
 				}
 			}
@@ -198,8 +199,8 @@ public class SuffixTree {
 
 		public void undoLast() {
 			if (curNode.isLeaf()) {
-				if (index == curNode.start) {
-					curNode = curNode.parent;
+				if (index == curNode.getStart()) {
+					curNode = curNode.getParent();
 				} else {
 					index--;
 				}
