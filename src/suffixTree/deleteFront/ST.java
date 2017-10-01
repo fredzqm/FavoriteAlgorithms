@@ -1,3 +1,4 @@
+package suffixTree.deleteFront;
 /*
  * Copyright (c) 2016 Sergey Makagonov
  * 

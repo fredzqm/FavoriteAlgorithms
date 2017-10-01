@@ -1,4 +1,4 @@
-package grow;
+package suffixTree;
 
 import java.util.Collections;
 import java.util.Map;

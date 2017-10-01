@@ -1,4 +1,4 @@
-package grow;
+package suffixTree;
 import static org.junit.Assert.*;
 
 import java.util.HashSet;
