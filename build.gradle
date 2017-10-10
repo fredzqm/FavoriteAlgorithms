@@ -2,3 +2,8 @@ plugins {
   id 'java'
   id 'eclipse'
 }
+
+
+dependencies {
+  testCompile 'junit:junit:4.12'
+}
