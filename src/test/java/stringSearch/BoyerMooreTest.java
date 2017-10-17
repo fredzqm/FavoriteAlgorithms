@@ -20,6 +20,16 @@ public class BoyerMooreTest {
 		assertFalse(x.hasNext());
 	}
 	
+	@Test
+	public void test3() {
+		BoyerMooreMatcher matcher = new BoyerMooreMatcher("ABCBAB");
+		
+		Iterator<Integer> x = matcher.findMatchIn("ABCBAB");
+		assertTrue(x.hasNext());
+		assertEquals(0 , (int) x.next());
+		assertFalse(x.hasNext());
+	}
+	
 	
 	@Test
 	public void test2() {
