@@ -8,7 +8,6 @@ public class KInversions {
     public static long gen = 71;
     public static int levels = 5;
     public static int len = 1 << levels;
-    public static long[] w = new long[levels + 1];
 
     // need 2*n <= len
 
@@ -19,6 +18,12 @@ public class KInversions {
         }
     }
 
+    /**
+     * https://www.wikiwand.com/en/Cooley%E2%80%93Tukey_FFT_algorithm
+     *
+     * @param a
+     * @param gen
+     */
     public static void transform(long[] a, long gen) {
         for (int i = 0; i < len; i++) {
             int j = Integer.reverse(i) >>> (32 - levels); // the bit reverse step for in-place operation
@@ -28,21 +33,18 @@ public class KInversions {
                 a[j] = t;
             }
         }
-
-        w[levels - 1] = gen;
-        for (int i = levels - 2; i >= 0; i--) {
-            w[i] = w[i + 1] * w[i + 1] % mod;
+        long[] fr = new long[len / 2];
+        fr[0] = 1;
+        for (int j = 1; j < len / 2; j++) {
+            fr[j] = fr[j - 1] * gen % mod;
         }
-        for (int l = 0; l < levels; l++) {
-            int hs = 1 << l;
-            long[] fr = new long[hs];
-            fr[0] = 1;
-            for (int j = 1; j < hs; j++)
-                fr[j] = fr[j - 1] * w[l] % mod;
-            for (int i = 0; i < len; i += hs * 2) {
-                for (int j = i; j < i + hs; j++) {
-                    long tre = a[j + hs] * fr[j - i] % mod;
-                    a[j + hs] = (a[j] + mod - tre) % mod;
+        for (int level = 1; level <= levels; level++) {
+            int halfSize = 1 << (level - 1);
+            int step = 1 << (levels - level);
+            for (int i = 0; i < len; i += halfSize * 2) {
+                for (int j = i; j < i + halfSize; j++) {
+                    long tre = a[j + halfSize] * fr[(j - i) * step] % mod;
+                    a[j + halfSize] = (a[j] + mod - tre) % mod;
                     a[j] = (a[j] + tre) % mod;
                 }
             }
