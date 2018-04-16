@@ -29,24 +29,21 @@ public class KInversions {
             }
         }
 
-        w[levels] = gen;
-        for (int i = levels - 1; i >= 0; i--) {
+        w[levels - 1] = gen;
+        for (int i = levels - 2; i >= 0; i--) {
             w[i] = w[i + 1] * w[i + 1] % mod;
         }
-        for (int l = 1, hs = 1; (1 << l) <= len; l++, hs <<= 1) {
+        for (int l = 0; l < levels; l++) {
+            int hs = 1 << l;
             long[] fr = new long[hs];
             fr[0] = 1;
             for (int j = 1; j < hs; j++)
                 fr[j] = fr[j - 1] * w[l] % mod;
-            for (int i = 0; i < len; i += (1 << l)) {
+            for (int i = 0; i < len; i += hs * 2) {
                 for (int j = i; j < i + hs; j++) {
                     long tre = a[j + hs] * fr[j - i] % mod;
-                    a[j + hs] = a[j] + mod - tre;
-                    if (a[j + hs] >= mod)
-                        a[j + hs] -= mod;
-                    a[j] += tre;
-                    if (a[j] >= mod)
-                        a[j] -= mod;
+                    a[j + hs] = (a[j] + mod - tre) % mod;
+                    a[j] = (a[j] + tre) % mod;
                 }
             }
         }
@@ -73,6 +70,7 @@ public class KInversions {
         long[] arr2 = new long[len];
         arr2[1] = 1;
         arr2[3] = 1;
+        arr2[4] = 1;
 
         conv(arr1, arr2);
 
