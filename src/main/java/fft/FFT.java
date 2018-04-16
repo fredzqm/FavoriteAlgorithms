@@ -32,11 +32,9 @@ public class FFT {
             // b = M*(x1-q*x) - N*(y1-q*y)
             a = b;
             b = t;
-
 //            t = x;
 //            x = x1 - q * x;
 //            x1 = t;
-
             t = y;
             y = y1 - q * y;
             y1 = t;
