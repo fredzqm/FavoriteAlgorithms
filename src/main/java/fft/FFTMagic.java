@@ -2,10 +2,10 @@ package fft;
 
 import java.util.Arrays;
 
-public class FFT {
+public class FFTMagic {
     public static long mod = (5 << 25) + 1;
     public static long gen = 71;
-    public static int levels = 17;
+    public static int levels = 5;
     public static int len = 1 << levels;  // need 2*n <= len
 
     static {
@@ -114,6 +114,7 @@ public class FFT {
         long[] arr1 = new long[len];
         arr1[1] = 1;
         arr1[3] = 1;
+
         long[] arr2 = new long[len];
         arr2[1] = 1;
         arr2[3] = 1;
@@ -122,5 +123,10 @@ public class FFT {
         conv(arr1, arr2);
 
         System.out.println(Arrays.toString(arr1));
+
+        long[] unit = new long[len];
+        unit[0] = 1;
+        transform(unit, gen);
+        System.out.println(Arrays.toString(unit));
     }
 }
